@@ -14,4 +14,8 @@ export const DEFAULT_BULLET_ENHANCE_OBJECT: BulletEnhancedInterface = {
   speed: 10,
   explodeRadius: 50,
   explodeDamage: 10,
+  collisionCanvasTimes: 2,
 };
+
+
+export const LEVEL_UP_KILL_COUNT = 2 * 6;

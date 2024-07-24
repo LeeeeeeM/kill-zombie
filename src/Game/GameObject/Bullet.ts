@@ -1,7 +1,7 @@
 import GameObject from "./GameObject";
 import { DEFAULT_BULLET_ENHANCE_OBJECT } from "../constants";
 import { GameObjectEnum } from "../enum";
-import { BulletEnhancedInterface } from "../type";
+import { BoundInterface, BulletEnhancedInterface, VelocityVector } from "../type";
 
 class Bullet extends GameObject {
   public explodeRadius: number;
@@ -9,7 +9,8 @@ class Bullet extends GameObject {
   private angle: number;
   public damage: number;
   public explodeDamage: number;
-  private velocity: { vx: number; vy: number };
+  private velocity: VelocityVector;
+  private collisionCanvasTimes: number;
   constructor(
     x: number,
     y: number,
@@ -17,17 +18,51 @@ class Bullet extends GameObject {
   ) {
     super(x, y, enhanced.radius, GameObjectEnum.BULLET);
     this.explodeRadius = enhanced.explodeRadius;
-    this.speed = enhanced.speed;
+    this.collisionCanvasTimes = enhanced.collisionCanvasTimes;
     this.angle = enhanced.angle;
     this.damage = enhanced.damage;
     this.explodeDamage = enhanced.explodeDamage;
-    this.velocity = this.calculateVelocity();
+    this.speed = enhanced.speed;
+    this.velocity = this._calculateVelocityVector();
   }
 
-  calculateVelocity() {
+  hasLeftCollision() {
+    return this.collisionCanvasTimes > 0;
+  }
+
+  _calculateVelocityVector(): VelocityVector {
     const vx = this.speed * Math.cos(this.angle);
     const vy = this.speed * Math.sin(this.angle);
     return { vx, vy };
+  }
+
+  _updateVelocityXVector() {
+    this.velocity.vx = -this.velocity.vx;
+  }
+
+  _updateVelocityYVector() {
+    this.velocity.vy = -this.velocity.vy;
+  }
+
+  _isCollisionX(leftLimit: number, rightLimit: number) {
+    return this.x - this.r <= leftLimit || this.x + this.r >= rightLimit;
+  }
+
+  _isCollisionY(topLimit: number, bottomLimit: number) {
+    return this.y - this.r <= topLimit || this.y + this.r >= bottomLimit;
+  }
+
+  checkBound(bound: BoundInterface) {
+    // 如果碰撞次数小于0，直接返回
+    if (this.collisionCanvasTimes <= 0) return;
+    if (this._isCollisionX(bound.left, bound.right)) {
+      this._updateVelocityXVector();
+      this.collisionCanvasTimes--;
+    }
+    if (this._isCollisionY(bound.top, bound.bottom)) {
+      this._updateVelocityYVector();
+      this.collisionCanvasTimes--;
+    }
   }
 
   update() {
@@ -51,14 +86,6 @@ class Bullet extends GameObject {
     ctx.fill();
     // ctx.strokeStyle = 'blue';
     // ctx.strokeText(this.count, this.x, this.y);
-  }
-
-  isOffCanvas(yLimit: number = 0, xLimit: number = 0) {
-    return (
-      this.y + this.r < yLimit ||
-      this.x + this.r < 0 ||
-      this.x - this.r > xLimit
-    );
   }
 }
 

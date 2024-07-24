@@ -1,5 +1,6 @@
 import { Circle } from "@timohausmann/quadtree-ts";
 import { GameObjectEnum } from "../enum";
+import { BoundInterface } from "../type";
 
 // for debug
 let data = 0;
@@ -36,6 +37,15 @@ class GameObject extends Circle {
     const dy = this.y - other.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
     return distance <= this.r + other.r;
+  }
+
+  isOffCanvas(bound: BoundInterface) {
+    return (
+      this.y + this.r < bound.top ||
+      this.y - this.r > bound.bottom ||
+      this.x + this.r < bound.left ||
+      this.x - this.r > bound.right
+    );
   }
 }
 

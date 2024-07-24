@@ -40,10 +40,6 @@ class Zombie extends GameObject {
     ctx.strokeStyle = "blue";
     ctx.strokeText(`${this.health}`, this.x, this.y);
   }
-
-  isOffCanvas(yLimit: number) {
-    return this.y - this.r > yLimit;
-  }
 }
 
 export default Zombie;

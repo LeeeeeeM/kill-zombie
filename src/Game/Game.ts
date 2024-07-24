@@ -3,7 +3,7 @@ import Zombie from "./GameObject/Zombie";
 import Bullet from "./GameObject/Bullet";
 import Player from "./GameObject/Player";
 import GameObject from "./GameObject/GameObject";
-import { BulletEnhancedInterface, ZombieEnhanceInterface } from "./type";
+import { BoundInterface, BulletEnhancedInterface, ZombieEnhanceInterface } from "./type";
 import {
   DEFAULT_BULLET_ENHANCE_OBJECT,
   DEFAULT_ZOMBIE_ENHANCE_OBJECT,
@@ -38,6 +38,10 @@ class Game {
 
   private bulletSpawner: BulletSpawner;
 
+  private active: boolean;
+
+  private canvasBounds: BoundInterface;
+
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.ctx = this.canvas.getContext("2d")!;
@@ -55,6 +59,17 @@ class Game {
     this.zombieSpawner = new ZombieSpawner(this, 600);
     this.zombieBossSpawner = new ZombieBossSpawner(this, 10 * 1000);
     this.bulletSpawner = new BulletSpawner(this, 200);
+    this.active = false;
+    this.canvasBounds = {
+        left: 0,
+        right: this.canvas.width,
+        top: 0,
+        bottom: this.canvas.height,
+      };
+  }
+
+  isActive() {
+    return this.active;
   }
 
   getPlayer() {
@@ -76,6 +91,20 @@ class Game {
     this.draw = this.draw.bind(this);
     this.gameLoop = this.gameLoop.bind(this);
     this.handleCollisions = this.handleCollisions.bind(this);
+    this.active = true;
+  }
+
+  reset() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.quadTree.clear();
+    this.bullets.clear();
+    this.zombies.clear();
+    this.explodeBullets.clear();
+  }
+
+  destory() {
+    this.reset();
+    this.active = false;
   }
 
   generateGameObject() {
@@ -131,23 +160,24 @@ class Game {
     this.shotTargetZombie = null;
 
     for (let [, zombie] of this.zombies) {
-      zombie.update();
-      if (zombie.isOffCanvas(this.canvas.height)) {
-        this.zombies.delete(zombie.count);
-        this.quadTree.remove(zombie, true);
-      } else {
-        this.updateTargetZombie(this.canvas.height - 20, zombie);
-        this.quadTree.update(zombie, true);
-        // this.quadTree.insert(zombie);
+        zombie.update();
+        if (zombie.isOffCanvas(this.canvasBounds)) {
+          this.zombies.delete(zombie.count);
+          this.quadTree.remove(zombie, true);
+        } else {
+          this.updateTargetZombie(this.canvas.height - 20, zombie);
+          this.quadTree.update(zombie, true);
+          // this.quadTree.insert(zombie);
+        }
       }
-    }
-    for (let [, bullet] of this.bullets) {
-      bullet.update();
-
-      if (bullet.isOffCanvas(0, this.canvas.width)) {
-        this.bullets.delete(bullet.count);
+      for (let [, bullet] of this.bullets) {
+        bullet.checkBound(this.canvasBounds);
+        bullet.update();
+  
+        if (bullet.isOffCanvas(this.canvasBounds) && !bullet.hasLeftCollision()) {
+          this.bullets.delete(bullet.count);
+        }
       }
-    }
   }
 
   draw() {
@@ -257,6 +287,7 @@ class Game {
         ...DEFAULT_BULLET_ENHANCE_OBJECT,
         damage: player.damage,
         angle: this.calculateAngle(player, target) + angle,
+        collisionCanvasTimes: player.collisionCanvasTimes
       };
       const newBullet = new Bullet(
         this.canvas.width / 2,
