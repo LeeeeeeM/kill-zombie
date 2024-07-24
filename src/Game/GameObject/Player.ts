@@ -7,19 +7,33 @@ class Player extends GameObject {
   damage: number;
   killCount: number;
   level: number;
-  bulletCount: number;
-  collisionCanvasTimes: number;
+  trajectoryCount: number;
+  collisionWallTimes: number;
+  fireTimes: number;
   constructor(x: number, y: number) {
     super(x, y, 10, GameObjectEnum.PLAYER);
     this.damage = 30;
     this.killCount = 0;
     this.level = 1;
-    this.bulletCount = 1;
-    this.collisionCanvasTimes = 0;
+    this.trajectoryCount = 1;
+    this.collisionWallTimes = 0;
+    this.fireTimes = 1;
   }
 
-  updateBulletCount(bulletCount: number) {
-    this.bulletCount = bulletCount;
+  getStandX() {
+    return this.x;
+  }
+
+  getStandY() {
+    return this.y;
+  }
+
+  updateFireTimes(fireTimes: number) {
+    this.fireTimes = fireTimes;
+  }
+
+  updatetrajectoryCount(trajectoryCount: number) {
+    this.trajectoryCount = trajectoryCount;
   }
 
   updateDamage(damage: number) {
@@ -27,7 +41,7 @@ class Player extends GameObject {
   }
 
   updateCollisionCanvasTimes(times: number) {
-    this.collisionCanvasTimes = times;
+    this.collisionWallTimes = times;
   }
 
   addKill(z: Zombie) {
@@ -36,9 +50,9 @@ class Player extends GameObject {
     } else {
       this.killCount++;
     }
-    // 打死100个升级
+    // 打死N个升级
     if (
-      this.killCount % (LEVEL_UP_KILL_COUNT * Math.pow(4, this.level - 1)) ===
+      this.killCount % (LEVEL_UP_KILL_COUNT * Math.pow(6, this.level - 1)) ===
       0
     ) {
       this.levelUp();
@@ -50,12 +64,13 @@ class Player extends GameObject {
   }
 
   levelUp() {
-    if (this.level > 3) return;
+    if (this.level > 2) return;
     console.log("level up!!!");
     this.level++;
     this.updateDamage(this.damage + 10);
-    this.updateBulletCount(this.bulletCount + 1);
-    this.updateCollisionCanvasTimes(this.collisionCanvasTimes + 1);
+    this.updatetrajectoryCount(this.trajectoryCount + 1);
+    this.updateCollisionCanvasTimes(this.collisionWallTimes + 1);
+    this.updateFireTimes(this.fireTimes + 1);
   }
 
   draw(ctx: CanvasRenderingContext2D) {

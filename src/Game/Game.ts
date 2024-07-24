@@ -3,9 +3,15 @@ import Zombie from "./GameObject/Zombie";
 import Bullet from "./GameObject/Bullet";
 import Player from "./GameObject/Player";
 import GameObject from "./GameObject/GameObject";
-import { BoundInterface, BulletEnhancedInterface, ZombieEnhanceInterface } from "./type";
+import {
+  BoundInterface,
+  BulletEnhancedInterface,
+  Position,
+  ZombieEnhanceInterface,
+} from "./type";
 import {
   DEFAULT_BULLET_ENHANCE_OBJECT,
+  DEFAULT_ZOMBIE_BOSS_ENHANCE_OBJECT,
   DEFAULT_ZOMBIE_ENHANCE_OBJECT,
 } from "./constants";
 import ZombieSpawner from "./Spawner/ZombieSpawner";
@@ -58,14 +64,14 @@ class Game {
 
     this.zombieSpawner = new ZombieSpawner(this, 600);
     this.zombieBossSpawner = new ZombieBossSpawner(this, 10 * 1000);
-    this.bulletSpawner = new BulletSpawner(this, 200);
+    this.bulletSpawner = new BulletSpawner(this, 400);
     this.active = false;
     this.canvasBounds = {
-        left: 0,
-        right: this.canvas.width,
-        top: 0,
-        bottom: this.canvas.height,
-      };
+      left: 0,
+      right: this.canvas.width,
+      top: 0,
+      bottom: this.canvas.height,
+    };
   }
 
   isActive() {
@@ -160,24 +166,24 @@ class Game {
     this.shotTargetZombie = null;
 
     for (let [, zombie] of this.zombies) {
-        zombie.update();
-        if (zombie.isOffCanvas(this.canvasBounds)) {
-          this.zombies.delete(zombie.count);
-          this.quadTree.remove(zombie, true);
-        } else {
-          this.updateTargetZombie(this.canvas.height - 20, zombie);
-          this.quadTree.update(zombie, true);
-          // this.quadTree.insert(zombie);
-        }
+      zombie.update();
+      if (zombie.isOffCanvas(this.canvasBounds)) {
+        this.zombies.delete(zombie.count);
+        this.quadTree.remove(zombie, true);
+      } else {
+        this.updateTargetZombie(this.canvas.height - 20, zombie);
+        this.quadTree.update(zombie, true);
+        // this.quadTree.insert(zombie);
       }
-      for (let [, bullet] of this.bullets) {
-        bullet.checkBound(this.canvasBounds);
-        bullet.update();
-  
-        if (bullet.isOffCanvas(this.canvasBounds) && !bullet.hasLeftCollision()) {
-          this.bullets.delete(bullet.count);
-        }
+    }
+    for (let [, bullet] of this.bullets) {
+      bullet.checkBound(this.canvasBounds);
+      bullet.update();
+
+      if (bullet.isOffCanvas(this.canvasBounds) && !bullet.hasLeftCollision()) {
+        this.bullets.delete(bullet.count);
       }
+    }
   }
 
   draw() {
@@ -277,24 +283,31 @@ class Game {
     }
   }
 
-  shootBullet(bulletCount: number = 1) {
+  shootBullet() {
     const player = this.player;
     const target = this.shotTargetZombie;
-    const angles = calculateRangeAngles(bulletCount);
+    const angles = calculateRangeAngles(player.trajectoryCount);
+    // const fireTimes = player.fireTimes;
 
     for (let angle of angles) {
+      const adjustedAngle = this.calculateAngle(player, target);
       const enhanced: BulletEnhancedInterface = {
         ...DEFAULT_BULLET_ENHANCE_OBJECT,
         damage: player.damage,
-        angle: this.calculateAngle(player, target) + angle,
-        collisionCanvasTimes: player.collisionCanvasTimes
+        angle: adjustedAngle + angle,
+        collisionWallTimes: player.collisionWallTimes,
       };
+      //   for (let i = 0; i < fireTimes; i++) {
+      // const deltaHeight = 20 * i;
+      // const deltaWidth = deltaHeight / Math.tan(enhanced.angle);
+
       const newBullet = new Bullet(
-        this.canvas.width / 2,
-        this.canvas.height - 20,
+        player.getStandX(),
+        player.getStandY(),
         enhanced
       );
       this.bullets.set(newBullet.count, newBullet);
+      //   }
     }
   }
 
@@ -309,11 +322,7 @@ class Game {
 
   addZombieBoss(x: number) {
     const enhanced: ZombieEnhanceInterface = {
-      ...DEFAULT_ZOMBIE_ENHANCE_OBJECT,
-      radius: 20,
-      speed: 1,
-      health: 500,
-      isBoss: true,
+      ...DEFAULT_ZOMBIE_BOSS_ENHANCE_OBJECT,
     };
     const newZombie = new Zombie(x, 0, enhanced);
     this.zombies.set(newZombie.count, newZombie);

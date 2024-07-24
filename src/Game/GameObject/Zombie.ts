@@ -13,6 +13,10 @@ class Zombie extends GameObject {
     this.is_boss = enhanced.isBoss;
   }
 
+  getSpeed() {
+    return this.speed;
+  }
+
   update() {
     this.y += this.speed; // Zombies move down
   }
