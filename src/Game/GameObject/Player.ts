@@ -10,7 +10,6 @@ class Player extends GameObject {
   trajectoryCount: number;
   collisionWallTimes: number;
   fireTimes: number;
-  firePosition: number;
   constructor(x: number, y: number) {
     super(x, y, 10, GameObjectEnum.PLAYER);
     this.damage = 30;
@@ -19,7 +18,6 @@ class Player extends GameObject {
     this.trajectoryCount = 1;
     this.collisionWallTimes = 0;
     this.fireTimes = 1;
-    this.firePosition = 20;
   }
 
   getStandX() {
@@ -27,7 +25,7 @@ class Player extends GameObject {
   }
 
   getStandY() {
-    return this.y - this.firePosition;
+    return this.y;
   }
 
   updateFireTimes(fireTimes: number) {
@@ -66,7 +64,7 @@ class Player extends GameObject {
   }
 
   levelUp() {
-    if (this.level > 0) return;
+    if (this.level > 2) return;
     console.log("level up!!!");
     this.level++;
     this.updateDamage(this.damage + 10);
@@ -77,7 +75,7 @@ class Player extends GameObject {
 
   draw(ctx: CanvasRenderingContext2D) {
     ctx.beginPath();
-    ctx.arc(this.x, this.y - this.firePosition, this.r, 0, Math.PI * 2);
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
     ctx.fillStyle = "blue";
     ctx.fill();
   }

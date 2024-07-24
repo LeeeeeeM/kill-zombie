@@ -59,7 +59,7 @@ class Game {
     this.bullets = new Map();
     this.explodeBullets = new Map();
     this.running = false;
-    this.player = new Player(this.canvas.width / 2, this.canvas.height);
+    this.player = new Player(this.canvas.width / 2, this.canvas.height - 20);
     this.shotTargetZombie = null;
 
     this.zombieSpawner = new ZombieSpawner(this, 600);
@@ -267,22 +267,6 @@ class Game {
     return Math.atan2(dy, dx);
   }
 
-  predictZombiePosition(
-    zombie: Zombie | null,
-    player: Player,
-    speed: number
-  ): Position | null {
-    if (!zombie || !player) return null;
-    const timeToHit =
-      Math.sqrt((zombie.x - player.x) ** 2 + (zombie.y - player.y) ** 2) /
-      speed;
-    const zombieSpeed = zombie.getSpeed();
-    // 暂时不考虑x轴因素
-    const predictedX = zombie.x + 0 * timeToHit;
-    const predictedY = zombie.y + zombieSpeed * timeToHit;
-    return { x: predictedX, y: predictedY };
-  }
-
   drawQuadtree(node: Quadtree<Circle>, ctx: CanvasRenderingContext2D) {
     if (node.nodes.length === 0) {
       ctx.strokeStyle = `rgba(127,255,212,0.25)`;
@@ -303,10 +287,9 @@ class Game {
     const player = this.player;
     const target = this.shotTargetZombie;
     const angles = calculateRangeAngles(player.trajectoryCount);
-    const fireTimes = player.fireTimes;
+    // const fireTimes = player.fireTimes;
 
     for (let angle of angles) {
-    //   const predictedPosition = this.predictZombiePosition(target, player, DEFAULT_BULLET_ENHANCE_OBJECT.speed);
       const adjustedAngle = this.calculateAngle(player, target);
       const enhanced: BulletEnhancedInterface = {
         ...DEFAULT_BULLET_ENHANCE_OBJECT,
@@ -314,18 +297,17 @@ class Game {
         angle: adjustedAngle + angle,
         collisionWallTimes: player.collisionWallTimes,
       };
+      //   for (let i = 0; i < fireTimes; i++) {
+      // const deltaHeight = 20 * i;
+      // const deltaWidth = deltaHeight / Math.tan(enhanced.angle);
 
-      for (let i = fireTimes - 1; i >= 0; i--) {
-        const deltaHeight = 20 * i;
-        const deltaWidth = deltaHeight / Math.tan(enhanced.angle);
-
-        const newBullet = new Bullet(
-          player.getStandX() - deltaWidth,
-          player.getStandY() - deltaHeight,
-          enhanced
-        );
-        this.bullets.set(newBullet.count, newBullet);
-      }
+      const newBullet = new Bullet(
+        player.getStandX(),
+        player.getStandY(),
+        enhanced
+      );
+      this.bullets.set(newBullet.count, newBullet);
+      //   }
     }
   }
 
