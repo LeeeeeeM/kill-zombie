@@ -6,8 +6,7 @@ class BulletSpawner extends Spawner {
     super(game, spawnInterval);
   }
   spawn() {
-    const player = this.game.getPlayer();
-    this.game.shootBullet(player.bulletCount);
+    this.game.shootBullet();
   }
 }
 

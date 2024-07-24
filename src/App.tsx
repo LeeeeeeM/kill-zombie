@@ -1,7 +1,6 @@
-import { useEffect, useRef } from 'react';
-import { useVisibile } from './hooks/useVisible';
-import Game from './Game/Game';
-// import { Game } from './Space';
+import { useEffect, useRef } from "react";
+import { useVisibile } from "./hooks/useVisible";
+import Game from "./Game/Game";
 
 const TaskDemo = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -30,13 +29,12 @@ const TaskDemo = () => {
     }
   };
 
-
   useEffect(() => {
     const game = gameRef.current;
     if (game?.isRunning() && !visible) {
       game.pause();
     }
-  }, [visible])
+  }, [visible]);
 
   useEffect(() => {
     const shot = () => {
@@ -48,23 +46,26 @@ const TaskDemo = () => {
     };
 
     if (canvasRef.current) {
-      canvasRef.current.addEventListener('click', shot);
+      canvasRef.current.addEventListener("click", shot);
     }
-    
 
     return () => {
       if (canvasRef.current) {
-        canvasRef.current.removeEventListener('click', shot);
+        canvasRef.current.removeEventListener("click", shot);
       }
     };
   }, [canvasRef.current]);
 
   return (
-    <div>
-      <button onClick={start}>Start Game</button>
-      <button onClick={pause}>Pause Game</button>
-      <canvas ref={canvasRef} width="640" height="480"></canvas>
-    </div>
+    <>
+      <div className="canvas">
+        <canvas ref={canvasRef} width="640" height="480"></canvas>
+      </div>
+      <div className="btn-box">
+        <button onClick={start}>Start Game</button>
+        <button onClick={pause}>Pause Game</button>
+      </div>
+    </>
   );
 };
 

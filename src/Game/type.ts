@@ -12,7 +12,7 @@ export interface BulletEnhancedInterface {
   speed: number;
   explodeRadius: number;
   explodeDamage: number;
-  collisionCanvasTimes: number;
+  collisionWallTimes: number;
 }
 
 export interface VelocityVector {
@@ -25,4 +25,9 @@ export interface BoundInterface {
   bottom: number;
   left: number;
   right: number;
+}
+
+export interface Position {
+  x: number;
+  y: number;
 }

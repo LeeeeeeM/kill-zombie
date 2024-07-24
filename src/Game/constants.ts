@@ -7,6 +7,13 @@ export const DEFAULT_ZOMBIE_ENHANCE_OBJECT: ZombieEnhanceInterface = {
   isBoss: false,
 };
 
+export const DEFAULT_ZOMBIE_BOSS_ENHANCE_OBJECT: ZombieEnhanceInterface = {
+  radius: 20,
+  speed: 1,
+  health: 500,
+  isBoss: true,
+};
+
 export const DEFAULT_BULLET_ENHANCE_OBJECT: BulletEnhancedInterface = {
   radius: 5,
   angle: Math.PI / 2,
@@ -14,8 +21,7 @@ export const DEFAULT_BULLET_ENHANCE_OBJECT: BulletEnhancedInterface = {
   speed: 10,
   explodeRadius: 50,
   explodeDamage: 10,
-  collisionCanvasTimes: 2,
+  collisionWallTimes: 0,
 };
-
 
 export const LEVEL_UP_KILL_COUNT = 2 * 6;

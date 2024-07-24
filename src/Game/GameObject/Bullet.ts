@@ -10,7 +10,7 @@ class Bullet extends GameObject {
   public damage: number;
   public explodeDamage: number;
   private velocity: VelocityVector;
-  private collisionCanvasTimes: number;
+  private collisionWallTimes: number;
   constructor(
     x: number,
     y: number,
@@ -18,7 +18,7 @@ class Bullet extends GameObject {
   ) {
     super(x, y, enhanced.radius, GameObjectEnum.BULLET);
     this.explodeRadius = enhanced.explodeRadius;
-    this.collisionCanvasTimes = enhanced.collisionCanvasTimes;
+    this.collisionWallTimes = enhanced.collisionWallTimes;
     this.angle = enhanced.angle;
     this.damage = enhanced.damage;
     this.explodeDamage = enhanced.explodeDamage;
@@ -27,7 +27,7 @@ class Bullet extends GameObject {
   }
 
   hasLeftCollision() {
-    return this.collisionCanvasTimes > 0;
+    return this.collisionWallTimes > 0;
   }
 
   _calculateVelocityVector(): VelocityVector {
@@ -54,14 +54,14 @@ class Bullet extends GameObject {
 
   checkBound(bound: BoundInterface) {
     // 如果碰撞次数小于0，直接返回
-    if (this.collisionCanvasTimes <= 0) return;
+    if (this.collisionWallTimes <= 0) return;
     if (this._isCollisionX(bound.left, bound.right)) {
       this._updateVelocityXVector();
-      this.collisionCanvasTimes--;
+      this.collisionWallTimes--;
     }
     if (this._isCollisionY(bound.top, bound.bottom)) {
       this._updateVelocityYVector();
-      this.collisionCanvasTimes--;
+      this.collisionWallTimes--;
     }
   }
 
