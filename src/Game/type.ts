@@ -31,3 +31,9 @@ export interface Position {
   x: number;
   y: number;
 }
+
+export interface BulletConstructorProps {
+    x: number;
+    y: number;
+    enhanced: BulletEnhancedInterface
+}

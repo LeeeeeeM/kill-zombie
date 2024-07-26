@@ -5,6 +5,7 @@ class Spawner {
   private lastSpawnTime: number;
   private pausedTime: number;
   private isActive: boolean;
+  private newSpawnInterval: number;
   game: Game;
   constructor(game: Game, spawnInterval: number) {
     this.game = game;
@@ -12,16 +13,31 @@ class Spawner {
     this.lastSpawnTime = Date.now();
     this.pausedTime = 0;
     this.isActive = false;
+    this.newSpawnInterval = spawnInterval;
   }
 
-  setInterval(rate: number) {
-    this.spawnInterval *= rate;
+  setInterval(interval: number) {
+    this.newSpawnInterval = interval;
+  }
+
+  _changeDiffInterval() {
+    if (this.newSpawnInterval !== this.spawnInterval) {
+      this.spawnInterval = this.newSpawnInterval;
+    };
   }
 
   spawn() {}
 
+  reset() {
+    this.isActive = false;
+    this.pausedTime = 0;
+  }
+
   start() {
     this.isActive = true;
+    if (this.pausedTime === 0) {
+      this._changeDiffInterval();
+    }
     this.lastSpawnTime = Date.now() - this.pausedTime;
     this.pausedTime = 0;
   }
@@ -37,6 +53,8 @@ class Spawner {
     if (elapsedTime >= this.spawnInterval && this.isActive) {
       this.spawn();
       this.lastSpawnTime = currentTime - (elapsedTime % this.spawnInterval);
+      // 更新 spawnInterval
+      this._changeDiffInterval();
     }
   }
 }

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useVisibile } from "./hooks/useVisible";
 import Game from "./Game/Game";
+import { flush, customFlush } from "./platform/utils";
 
 const TaskDemo = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -15,7 +16,7 @@ const TaskDemo = () => {
     }
 
     if (canvasRef.current) {
-      const game = new Game(canvasRef.current);
+      const game = new Game(canvasRef.current, flush);
       gameRef.current = game;
       (window as any).game = game;
       game.init();
@@ -42,7 +43,6 @@ const TaskDemo = () => {
       if (game?.isRunning?.()) {
         game.shootBullet();
       }
-      (window as any).game = game;
     };
 
     if (canvasRef.current) {
