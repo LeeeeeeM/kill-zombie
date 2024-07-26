@@ -38,15 +38,19 @@ class Game {
 
   private canvasBound: BoundInterface;
 
-  // 画布刷新方法，不依赖与web环境
-  private flush: (fn: FrameRequestCallback) => void;
+  private renderOutSide: boolean;
+
+  // // 画布刷新方法，不依赖与web环境
+  private flush?: (fn: FrameRequestCallback) => void;
 
   constructor(
     canvas: HTMLCanvasElement,
-    flush: (fn: FrameRequestCallback) => void
+    renderOutSide: boolean = false,
+    flush?: (fn: FrameRequestCallback) => void
   ) {
     this.canvas = canvas;
     this.ctx = this.canvas.getContext("2d")!;
+    this.renderOutSide = renderOutSide;
     this.flush = flush;
 
     // 四叉树查找
@@ -84,6 +88,18 @@ class Game {
 
   getPlayer() {
     return this.player;
+  }
+
+  getZombies() {
+    return this.zombies;
+  }
+
+  getBullets() {
+    return this.bullets;
+  }
+
+  getExplodeBullets() {
+    return this.explodeBullets;
   }
 
   getTargetZombie() {
@@ -149,9 +165,13 @@ class Game {
   gameLoop() {
     if (!this.running) return;
     this.update();
-    this.draw();
+    if (!this.renderOutSide) {
+      this.draw();
+    }
     this.handleCollisions();
-    this.flush(this.gameLoop);
+    if (!this.renderOutSide) {
+      this.flush?.(this.gameLoop);
+    }
   }
 
   // 更新距离最近的僵尸
@@ -178,7 +198,7 @@ class Game {
         this.zombies.delete(zombie.count);
         this.quadTree.remove(zombie, FAST_UPDATE);
       } else {
-        this.updateTargetZombie(this.player.getStandY(), zombie);
+        this.updateTargetZombie(this.player.getY(), zombie);
         this.quadTree.update(zombie, FAST_UPDATE);
       }
     }
@@ -295,8 +315,8 @@ class Game {
         collisionWallTimes: player.collisionWallTimes,
       };
       const newBullet = Bullet.createBullet(
-        player.getStandX(),
-        player.getStandY(),
+        player.getX(),
+        player.getY(),
         enhanced
       );
       this.bullets.set(newBullet.count, newBullet);

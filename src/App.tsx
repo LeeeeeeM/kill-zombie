@@ -16,7 +16,7 @@ const TaskDemo = () => {
     }
 
     if (canvasRef.current) {
-      const game = new Game(canvasRef.current, flush);
+      const game = new Game(canvasRef.current, false, flush);
       gameRef.current = game;
       (window as any).game = game;
       game.init();

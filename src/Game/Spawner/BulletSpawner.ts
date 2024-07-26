@@ -13,6 +13,8 @@ class BulletSpawner extends Spawner {
   spawn() {
     const player = this.game.getPlayer();
     const zombie = this.game.getTargetZombie();
+    // 自动发射模式，如果没有目标则不发射
+    if (!zombie) return;
     const bulletProps = player.shotBullets(zombie);
     const bullets = bulletProps.map((bulletProp) =>
       Bullet.createBullet(bulletProp.x, bulletProp.y, bulletProp.enhanced)

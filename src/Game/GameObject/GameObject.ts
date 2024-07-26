@@ -26,6 +26,18 @@ class GameObject extends Circle {
 
   update() {}
 
+  getX() {
+    return this.x;
+  }
+
+  getY() {
+    return this.y;
+  }
+
+  getRadius() {
+    return this.r;
+  }
+
   draw(ctx: CanvasRenderingContext2D) {}
 
   circleIntersect(other: Circle) {

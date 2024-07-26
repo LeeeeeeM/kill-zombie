@@ -24,14 +24,6 @@ class Player extends GameObject {
     this.comboTimes = 1;
   }
 
-  getStandX() {
-    return this.x;
-  }
-
-  getStandY() {
-    return this.y;
-  }
-
   // 更新连击数
   updateComboTimes(comboTimes: number) {
     this.comboTimes = comboTimes;
@@ -69,6 +61,10 @@ class Player extends GameObject {
 
   getLevel() {
     return this.level;
+  }
+
+  getKill() {
+    return this.killCount;
   }
 
   levelUp() {
@@ -126,8 +122,8 @@ class Player extends GameObject {
       };
 
       const newBullet = {
-        x: this.getStandX(),
-        y: this.getStandY(),
+        x: this.getX(),
+        y: this.getY(),
         enhanced
       };
       bulletsProps.push(newBullet);

@@ -119,6 +119,10 @@ class Bullet extends GameObject {
     // ctx.strokeText(this.count, this.x, this.y);
   }
 
+  getExplodeRadius() {
+    return this.explodeRadius;
+  }
+
   drawExplode(ctx: CanvasRenderingContext2D) {
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.explodeRadius, 0, Math.PI * 2);
