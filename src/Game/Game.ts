@@ -3,13 +3,11 @@ import Zombie from "./GameObject/Zombie";
 import Bullet from "./GameObject/Bullet";
 import Player from "./GameObject/Player";
 import { BoundInterface, BulletEnhancedInterface } from "./type";
-import { DEFAULT_BULLET_ENHANCE_OBJECT } from "./constants";
+import { DEFAULT_BULLET_ENHANCE_OBJECT, FAST_UPDATE } from "./constants";
 import ZombieSpawner from "./Spawner/ZombieSpawner";
 import ZombieBossSpawner from "./Spawner/ZombieBossSpawner";
 import BulletSpawner from "./Spawner/BulletSpawner";
 import { calculateAngle, calculateRangeAngles } from "./utils";
-
-let count = 0;
 
 class Game {
   public canvas: HTMLCanvasElement;
@@ -172,18 +170,16 @@ class Game {
     // 生成新的游戏对象
     this.generateGameObject();
     // 清空四叉树数据
-    // this.quadTree.clear();
     this.shotTargetZombie = null;
 
     for (let [, zombie] of this.zombies) {
       zombie.update();
       if (zombie.isOffCanvas(this.canvasBound)) {
         this.zombies.delete(zombie.count);
-        this.quadTree.remove(zombie);
+        this.quadTree.remove(zombie, FAST_UPDATE);
       } else {
         this.updateTargetZombie(this.player.getStandY(), zombie);
-        this.quadTree.update(zombie);
-        // this.quadTree.insert(zombie);
+        this.quadTree.update(zombie, FAST_UPDATE);
       }
     }
     for (let [, bullet] of this.bullets) {
@@ -247,7 +243,7 @@ class Game {
           if (zombie.isDead()) {
             this.player.addKill(zombie);
             this.zombies.delete(zombie.count);
-            this.quadTree.remove(zombie);
+            this.quadTree.remove(zombie, FAST_UPDATE);
             break; // 避免重复删除
           }
         }
@@ -277,7 +273,7 @@ class Game {
           if (zombie.isDead()) {
             this.player.addKill(zombie);
             this.zombies.delete(zombie.count);
-            this.quadTree.remove(zombie);
+            this.quadTree.remove(zombie, FAST_UPDATE);
             break; // 避免重复删除
           }
         }

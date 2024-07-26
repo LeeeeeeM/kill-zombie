@@ -25,3 +25,5 @@ export const DEFAULT_BULLET_ENHANCE_OBJECT: BulletEnhancedInterface = {
 };
 
 export const LEVEL_UP_KILL_COUNT = 2 * 6;
+
+export const FAST_UPDATE = true;
