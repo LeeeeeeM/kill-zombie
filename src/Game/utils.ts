@@ -1,3 +1,5 @@
+import { Circle } from "@timohausmann/quadtree-ts";
+
 export const getRandomRange = (start: number, end: number): number => {
   if (start > end) {
     return Math.random() * (start - end) + end;
@@ -17,4 +19,17 @@ export const calculateRangeAngles = (bulletCount: number): number[] => {
   }
 
   return angles;
+};
+
+export const calculateAngle = (
+  source: Circle | null,
+  target: Circle | null
+): number => {
+  if (!target || !source) {
+    // 如果没有则默认为90度垂直
+    return Math.PI / 2;
+  }
+  const dx = source.x - target.x;
+  const dy = source.y - target.y;
+  return Math.atan2(dy, dx);
 };

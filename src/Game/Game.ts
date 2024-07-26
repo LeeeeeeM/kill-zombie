@@ -2,22 +2,12 @@ import { Circle, Quadtree } from "@timohausmann/quadtree-ts";
 import Zombie from "./GameObject/Zombie";
 import Bullet from "./GameObject/Bullet";
 import Player from "./GameObject/Player";
-import GameObject from "./GameObject/GameObject";
-import {
-  BoundInterface,
-  BulletEnhancedInterface,
-  Position,
-  ZombieEnhanceInterface,
-} from "./type";
-import {
-  DEFAULT_BULLET_ENHANCE_OBJECT,
-  DEFAULT_ZOMBIE_BOSS_ENHANCE_OBJECT,
-  DEFAULT_ZOMBIE_ENHANCE_OBJECT,
-} from "./constants";
+import { BoundInterface, BulletEnhancedInterface } from "./type";
+import { DEFAULT_BULLET_ENHANCE_OBJECT } from "./constants";
 import ZombieSpawner from "./Spawner/ZombieSpawner";
 import ZombieBossSpawner from "./Spawner/ZombieBossSpawner";
 import BulletSpawner from "./Spawner/BulletSpawner";
-import { calculateRangeAngles } from "./utils";
+import { calculateAngle, calculateRangeAngles } from "./utils";
 
 class Game {
   public canvas: HTMLCanvasElement;
@@ -46,7 +36,7 @@ class Game {
 
   private active: boolean;
 
-  private canvasBounds: BoundInterface;
+  private canvasBound: BoundInterface;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -66,7 +56,7 @@ class Game {
     this.zombieBossSpawner = new ZombieBossSpawner(this, 10 * 1000);
     this.bulletSpawner = new BulletSpawner(this, 400);
     this.active = false;
-    this.canvasBounds = {
+    this.canvasBound = {
       left: 0,
       right: this.canvas.width,
       top: 0,
@@ -80,6 +70,10 @@ class Game {
 
   getPlayer() {
     return this.player;
+  }
+
+  getTargetZombie() {
+    return this.shotTargetZombie;
   }
 
   isRunning() {
@@ -167,21 +161,22 @@ class Game {
 
     for (let [, zombie] of this.zombies) {
       zombie.update();
-      if (zombie.isOffCanvas(this.canvasBounds)) {
+      if (zombie.isOffCanvas(this.canvasBound)) {
         this.zombies.delete(zombie.count);
-        this.quadTree.remove(zombie, true);
+        this.quadTree.remove(zombie);
       } else {
-        this.updateTargetZombie(this.canvas.height - 20, zombie);
-        this.quadTree.update(zombie, true);
+        this.updateTargetZombie(this.player.getStandY(), zombie);
+        this.quadTree.update(zombie);
         // this.quadTree.insert(zombie);
       }
     }
     for (let [, bullet] of this.bullets) {
-      bullet.checkBound(this.canvasBounds);
+      bullet.checkBound(this.canvasBound);
       bullet.update();
 
-      if (bullet.isOffCanvas(this.canvasBounds) && !bullet.hasLeftCollision()) {
+      if (bullet.isOffCanvas(this.canvasBound) && !bullet.hasLeftCollision()) {
         this.bullets.delete(bullet.count);
+        Bullet.release(bullet);
       }
     }
   }
@@ -220,7 +215,7 @@ class Game {
           if (zombie.isDead()) {
             this.player.addKill(zombie);
             this.zombies.delete(zombie.count);
-            this.quadTree.remove(zombie, true);
+            this.quadTree.remove(zombie);
             break; // 避免重复删除
           }
         }
@@ -228,6 +223,7 @@ class Game {
 
       // 移除所有的爆炸子弹
       this.explodeBullets.delete(explodeBullet.count);
+      Bullet.release(explodeBullet);
     }
 
     for (let [, bullet] of this.bullets) {
@@ -249,22 +245,12 @@ class Game {
           if (zombie.isDead()) {
             this.player.addKill(zombie);
             this.zombies.delete(zombie.count);
-            this.quadTree.remove(zombie, true);
+            this.quadTree.remove(zombie);
             break; // 避免重复删除
           }
         }
       }
     }
-  }
-
-  calculateAngle(source: GameObject | null, target: GameObject | null): number {
-    if (!target || !source) {
-      // 如果没有则默认为90度垂直
-      return Math.PI / 2;
-    }
-    const dx = source.x - target.x;
-    const dy = source.y - target.y;
-    return Math.atan2(dy, dx);
   }
 
   drawQuadtree(node: Quadtree<Circle>, ctx: CanvasRenderingContext2D) {
@@ -287,46 +273,33 @@ class Game {
     const player = this.player;
     const target = this.shotTargetZombie;
     const angles = calculateRangeAngles(player.trajectoryCount);
-    // const fireTimes = player.fireTimes;
 
     for (let angle of angles) {
-      const adjustedAngle = this.calculateAngle(player, target);
+      const adjustedAngle = calculateAngle(player, target);
       const enhanced: BulletEnhancedInterface = {
         ...DEFAULT_BULLET_ENHANCE_OBJECT,
         damage: player.damage,
         angle: adjustedAngle + angle,
         collisionWallTimes: player.collisionWallTimes,
       };
-      //   for (let i = 0; i < fireTimes; i++) {
-      // const deltaHeight = 20 * i;
-      // const deltaWidth = deltaHeight / Math.tan(enhanced.angle);
-
-      const newBullet = new Bullet(
+      const newBullet = Bullet.createBullet(
         player.getStandX(),
         player.getStandY(),
         enhanced
       );
       this.bullets.set(newBullet.count, newBullet);
-      //   }
     }
   }
 
-  addZombie(x: number) {
-    const enhanced: ZombieEnhanceInterface = {
-      ...DEFAULT_ZOMBIE_ENHANCE_OBJECT,
-    };
-    const newZombie = new Zombie(x, 0, enhanced);
-    this.zombies.set(newZombie.count, newZombie);
-    this.quadTree.insert(newZombie);
+  addBulletInternal(bullets: Bullet[]) {
+    bullets.forEach((bullet) => {
+      this.bullets.set(bullet.count, bullet);
+    });
   }
 
-  addZombieBoss(x: number) {
-    const enhanced: ZombieEnhanceInterface = {
-      ...DEFAULT_ZOMBIE_BOSS_ENHANCE_OBJECT,
-    };
-    const newZombie = new Zombie(x, 0, enhanced);
-    this.zombies.set(newZombie.count, newZombie);
-    this.quadTree.insert(newZombie);
+  addZombieInternal(zombie: Zombie) {
+    this.zombies.set(zombie.count, zombie);
+    this.quadTree.insert(zombie);
   }
 }
 

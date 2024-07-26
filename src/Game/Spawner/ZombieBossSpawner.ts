@@ -1,4 +1,7 @@
 import Game from "../Game";
+import Zombie from "../GameObject/Zombie";
+import { DEFAULT_ZOMBIE_BOSS_ENHANCE_OBJECT } from "../constants";
+import { ZombieEnhanceInterface } from "../type";
 import { getRandomRange } from "../utils";
 import Spawner from "./Spawner";
 
@@ -12,7 +15,14 @@ class ZombieBossSpawner extends Spawner {
     const start = center - 20;
     const end = center + 20;
     const position = getRandomRange(start, end);
-    this.game.addZombieBoss(position);
+
+    const enhanced: ZombieEnhanceInterface = {
+        ...DEFAULT_ZOMBIE_BOSS_ENHANCE_OBJECT,
+      };
+
+    const zombieBoss = new Zombie(position, 0, enhanced);
+
+    this.game.addZombieInternal(zombieBoss);
   }
 }
 

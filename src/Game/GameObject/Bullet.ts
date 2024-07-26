@@ -1,14 +1,18 @@
 import GameObject from "./GameObject";
 import { DEFAULT_BULLET_ENHANCE_OBJECT } from "../constants";
 import { GameObjectEnum } from "../enum";
-import { BoundInterface, BulletEnhancedInterface, VelocityVector } from "../type";
+import {
+  BoundInterface,
+  BulletEnhancedInterface,
+  VelocityVector,
+} from "../type";
 
 class Bullet extends GameObject {
   public explodeRadius: number;
-  private speed: number;
-  private angle: number;
   public damage: number;
   public explodeDamage: number;
+  private speed: number;
+  private angle: number;
   private velocity: VelocityVector;
   private collisionWallTimes: number;
   constructor(
@@ -17,6 +21,42 @@ class Bullet extends GameObject {
     enhanced: BulletEnhancedInterface = DEFAULT_BULLET_ENHANCE_OBJECT
   ) {
     super(x, y, enhanced.radius, GameObjectEnum.BULLET);
+    this.explodeRadius = enhanced.explodeRadius;
+    this.collisionWallTimes = enhanced.collisionWallTimes;
+    this.angle = enhanced.angle;
+    this.damage = enhanced.damage;
+    this.explodeDamage = enhanced.explodeDamage;
+    this.speed = enhanced.speed;
+    this.velocity = this._calculateVelocityVector();
+  }
+
+  static bulletPool: Bullet[] = [];
+
+  static bulletPoolCount = 100;
+
+  static createBullet(x: number, y: number, enhanced: BulletEnhancedInterface): Bullet {
+    let newBullet = Bullet.bulletPool.pop();
+    if (!newBullet) {
+      return new Bullet(x, y, enhanced);
+    }
+    newBullet.reset(x, y, enhanced);
+    return newBullet;
+  }
+
+  static release(bullet: Bullet) {
+    if (Bullet.bulletPool.length < Bullet.bulletPoolCount) {
+      Bullet.bulletPool.push(bullet);
+    }
+  }
+
+  reset(
+    x: number,
+    y: number,
+    enhanced: BulletEnhancedInterface = DEFAULT_BULLET_ENHANCE_OBJECT
+  ) {
+    this.x = x;
+    this.y = y;
+    this.r = enhanced.radius;
     this.explodeRadius = enhanced.explodeRadius;
     this.collisionWallTimes = enhanced.collisionWallTimes;
     this.angle = enhanced.angle;

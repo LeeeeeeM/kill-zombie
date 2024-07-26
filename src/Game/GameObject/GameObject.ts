@@ -28,10 +28,6 @@ class GameObject extends Circle {
 
   draw(ctx: CanvasRenderingContext2D) {}
 
-  isZombie() {
-    return this.type === GameObjectEnum.ZOMBIE;
-  }
-
   circleIntersect(other: Circle) {
     const dx = this.x - other.x;
     const dy = this.y - other.y;
