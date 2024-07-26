@@ -9,6 +9,8 @@ import ZombieBossSpawner from "./Spawner/ZombieBossSpawner";
 import BulletSpawner from "./Spawner/BulletSpawner";
 import { calculateAngle, calculateRangeAngles } from "./utils";
 
+let count = 0;
+
 class Game {
   public canvas: HTMLCanvasElement;
 
@@ -38,30 +40,44 @@ class Game {
 
   private canvasBound: BoundInterface;
 
-  constructor(canvas: HTMLCanvasElement) {
+  // 画布刷新方法，不依赖与web环境
+  private flush: (fn: FrameRequestCallback) => void;
+
+  constructor(
+    canvas: HTMLCanvasElement,
+    flush: (fn: FrameRequestCallback) => void
+  ) {
     this.canvas = canvas;
     this.ctx = this.canvas.getContext("2d")!;
+    this.flush = flush;
+
+    // 四叉树查找
     this.quadTree = new Quadtree({
       width: this.canvas.width,
       height: this.canvas.height,
     });
+
     this.zombies = new Map();
     this.bullets = new Map();
     this.explodeBullets = new Map();
-    this.running = false;
+    // 游戏玩家，目前是一个
     this.player = new Player(this.canvas.width / 2, this.canvas.height - 20);
+    // 锁定的射击对象，目前和玩家 1vs1
     this.shotTargetZombie = null;
-
+    // 游戏对象产生定时器
     this.zombieSpawner = new ZombieSpawner(this, 600);
     this.zombieBossSpawner = new ZombieBossSpawner(this, 10 * 1000);
     this.bulletSpawner = new BulletSpawner(this, 400);
-    this.active = false;
+
     this.canvasBound = {
       left: 0,
       right: this.canvas.width,
       top: 0,
       bottom: this.canvas.height,
     };
+    // 游戏状态
+    this.running = false;
+    this.active = false;
   }
 
   isActive() {
@@ -86,7 +102,7 @@ class Game {
   }
 
   init() {
-    // todo 初始化的一些操作
+    // 初始化的一些操作
     this.update = this.update.bind(this);
     this.draw = this.draw.bind(this);
     this.gameLoop = this.gameLoop.bind(this);
@@ -137,7 +153,7 @@ class Game {
     this.update();
     this.draw();
     this.handleCollisions();
-    requestAnimationFrame(this.gameLoop);
+    this.flush(this.gameLoop);
   }
 
   // 更新距离最近的僵尸
@@ -177,6 +193,22 @@ class Game {
       if (bullet.isOffCanvas(this.canvasBound) && !bullet.hasLeftCollision()) {
         this.bullets.delete(bullet.count);
         Bullet.release(bullet);
+      }
+    }
+  }
+
+  drawQuadtree(node: Quadtree<Circle>, ctx: CanvasRenderingContext2D) {
+    if (node.nodes.length === 0) {
+      ctx.strokeStyle = `rgba(127,255,212,0.25)`;
+      ctx.strokeRect(
+        node.bounds.x,
+        node.bounds.y,
+        node.bounds.width,
+        node.bounds.height
+      );
+    } else {
+      for (let i = 0; i < node.nodes.length; i = i + 1) {
+        this.drawQuadtree(node.nodes[i], ctx);
       }
     }
   }
@@ -249,22 +281,6 @@ class Game {
             break; // 避免重复删除
           }
         }
-      }
-    }
-  }
-
-  drawQuadtree(node: Quadtree<Circle>, ctx: CanvasRenderingContext2D) {
-    if (node.nodes.length === 0) {
-      ctx.strokeStyle = `rgba(127,255,212,0.25)`;
-      ctx.strokeRect(
-        node.bounds.x,
-        node.bounds.y,
-        node.bounds.width,
-        node.bounds.height
-      );
-    } else {
-      for (let i = 0; i < node.nodes.length; i = i + 1) {
-        this.drawQuadtree(node.nodes[i], ctx);
       }
     }
   }
