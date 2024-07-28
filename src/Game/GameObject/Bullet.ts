@@ -8,13 +8,15 @@ import {
 } from "../type";
 
 class Bullet extends GameObject {
-  public explodeRadius: number;
-  public damage: number;
-  public explodeDamage: number;
+  private explodeRadius: number;
+  private collisionWallTimes: number;
+  private damage: number;
+  private explodeDamage: number;
   private speed: number;
   private angle: number;
+  private pierceTimes: number;
   private velocity: VelocityVector;
-  private collisionWallTimes: number;
+  private canExplode: boolean;
   constructor(
     x: number,
     y: number,
@@ -26,7 +28,9 @@ class Bullet extends GameObject {
     this.angle = enhanced.angle;
     this.damage = enhanced.damage;
     this.explodeDamage = enhanced.explodeDamage;
+    this.pierceTimes = enhanced.pierceTimes;
     this.speed = enhanced.speed;
+    this.canExplode = enhanced.canExplode;
     this.velocity = this._calculateVelocityVector();
   }
 
@@ -62,8 +66,18 @@ class Bullet extends GameObject {
     this.angle = enhanced.angle;
     this.damage = enhanced.damage;
     this.explodeDamage = enhanced.explodeDamage;
+    this.pierceTimes = enhanced.pierceTimes;
+    this.canExplode = enhanced.canExplode;
     this.speed = enhanced.speed;
     this.velocity = this._calculateVelocityVector();
+  }
+
+  getDamage() {
+    return this.damage;
+  }
+
+  isExplosive() {
+    return this.canExplode;
   }
 
   hasLeftCollision() {
@@ -90,6 +104,15 @@ class Bullet extends GameObject {
 
   _isCollisionY(topLimit: number, bottomLimit: number) {
     return this.y - this.r <= topLimit || this.y + this.r >= bottomLimit;
+  }
+
+  hasPierceTimes() {
+    return this.pierceTimes > 0;
+  }
+
+  checkPierce() {
+    if (this.pierceTimes <= 0) return;
+    this.pierceTimes--;
   }
 
   checkBound(bound: BoundInterface) {
@@ -119,14 +142,14 @@ class Bullet extends GameObject {
     // ctx.strokeText(this.count, this.x, this.y);
   }
 
-  drawExplode(ctx: CanvasRenderingContext2D) {
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.explodeRadius, 0, Math.PI * 2);
-    ctx.fillStyle = "yellow";
-    ctx.fill();
-    // ctx.strokeStyle = 'blue';
-    // ctx.strokeText(this.count, this.x, this.y);
+  getExplodeRadius() {
+    return this.explodeRadius;
   }
+
+  getExpoldeDamage() {
+    return this.explodeDamage;
+  }
+
 }
 
 export default Bullet;

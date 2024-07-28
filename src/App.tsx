@@ -16,7 +16,7 @@ const TaskDemo = () => {
     }
 
     if (canvasRef.current) {
-      const game = new Game(canvasRef.current, flush);
+      const game = new Game(canvasRef.current, false, flush);
       gameRef.current = game;
       (window as any).game = game;
       game.init();
@@ -59,7 +59,7 @@ const TaskDemo = () => {
   return (
     <>
       <div className="canvas">
-        <canvas ref={canvasRef} width="640" height="480"></canvas>
+        <canvas ref={canvasRef} width="320" height="540"></canvas>
       </div>
       <div className="btn-box">
         <button onClick={start}>Start Game</button>

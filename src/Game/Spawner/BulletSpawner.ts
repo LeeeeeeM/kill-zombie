@@ -13,15 +13,18 @@ class BulletSpawner extends Spawner {
   spawn() {
     const player = this.game.getPlayer();
     const zombie = this.game.getTargetZombie();
+    // 自动发射模式，如果没有目标则不发射
+    if (!zombie) return;
     const bulletProps = player.shotBullets(zombie);
     const bullets = bulletProps.map((bulletProp) =>
       Bullet.createBullet(bulletProp.x, bulletProp.y, bulletProp.enhanced)
     );
     this.game.addBulletInternal(bullets);
     this.comboSpawner.reset();
-    if (player.comboTimes > 1) {
+    const comboTimes = player.getComboTimes();
+    if (comboTimes > 1) {
         this.comboSpawner.setLastBulletProps(bulletProps);
-        this.comboSpawner.setLeftComboTimes(player.comboTimes - 1);
+        this.comboSpawner.setLeftComboTimes(comboTimes - 1);
         this.comboSpawner.setInterval(50);
         this.comboSpawner.start();
     }
