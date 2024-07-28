@@ -89,7 +89,7 @@ class GameScene extends Phaser.Scene {
       this.rayGraphics.fillCircle(
         bullet.getX(),
         bullet.getY(),
-        bullet.getExplodeRadius()
+        bullet.getRadius()
       );
     }
 

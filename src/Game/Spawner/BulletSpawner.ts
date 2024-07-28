@@ -21,9 +21,10 @@ class BulletSpawner extends Spawner {
     );
     this.game.addBulletInternal(bullets);
     this.comboSpawner.reset();
-    if (player.comboTimes > 1) {
+    const comboTimes = player.getComboTimes();
+    if (comboTimes > 1) {
         this.comboSpawner.setLastBulletProps(bulletProps);
-        this.comboSpawner.setLeftComboTimes(player.comboTimes - 1);
+        this.comboSpawner.setLeftComboTimes(comboTimes - 1);
         this.comboSpawner.setInterval(50);
         this.comboSpawner.start();
     }

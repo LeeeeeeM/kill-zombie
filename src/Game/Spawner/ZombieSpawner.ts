@@ -19,7 +19,10 @@ class ZombieSpawner extends Spawner {
     // 每次随机生成3个
     for (let i = 0; i < 3; i++) {
       const position = getRandomRange(start, end);
-      const newZombie = new Zombie(position, 0, enhanced);
+      const newZombie = new Zombie(position, 0, {
+        ...enhanced,
+        speed: (getRandomRange(2, 5) >> 0) * 0.1
+      });
       this.game.addZombieInternal(newZombie);
     }
   }

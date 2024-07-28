@@ -2,26 +2,48 @@ import GameObject from "./GameObject";
 import Zombie from "./Zombie";
 import { GameObjectEnum } from "../enum";
 import { DEFAULT_BULLET_ENHANCE_OBJECT, LEVEL_UP_KILL_COUNT } from "../constants";
-import { BulletConstructorProps, BulletEnhancedInterface } from "../type";
+import { BulletConstructorProps, BulletEnhancedInterface, PlayerEnhancedInterface } from "../type";
 
 class Player extends GameObject {
   damage: number;
   killCount: number;
   level: number;
   // 弹道数量
-  trajectoryCount: number;
+  private trajectoryCount: number;
   // 和墙体碰撞次数
-  collisionWallTimes: number;
+  private collisionWallTimes: number;
   // 连击数
-  comboTimes: number;
-  constructor(x: number, y: number) {
-    super(x, y, 10, GameObjectEnum.PLAYER);
-    this.damage = 30;
+  private comboTimes: number;
+  private pierceTimes: number;
+  constructor(x: number, y: number, enhanced: PlayerEnhancedInterface) {
+    super(x, y, enhanced.radius, GameObjectEnum.PLAYER);
+    this.damage = enhanced.damage;
     this.killCount = 0;
     this.level = 1;
-    this.trajectoryCount = 1;
-    this.collisionWallTimes = 0;
-    this.comboTimes = 1;
+    this.trajectoryCount = enhanced.trajectoryCount;
+    this.collisionWallTimes = enhanced.collisionWallTimes;
+    this.comboTimes = enhanced.comboTimes;
+    this.pierceTimes = enhanced.pierceTimes;
+  }
+
+  getCollisionWallTimes() {
+    return this.collisionWallTimes;
+  }
+
+  getTrajectoryCount() {
+    return this.trajectoryCount;
+  }
+
+  getComboTimes() {
+    return this.comboTimes;
+  }
+
+  getPierceTimes() {
+    return this.pierceTimes;
+  }
+
+  updatePierceTimes(times: number) {
+    this.pierceTimes = times;
   }
 
   // 更新连击数
@@ -71,10 +93,11 @@ class Player extends GameObject {
     if (this.level > 2) return;
     console.log("level up!!!");
     this.level++;
-    this.updateDamage(this.damage + 10);
+    this.updateDamage(this.damage + 1);
     this.updatetrajectoryCount(this.trajectoryCount + 1);
     this.updateCollisionCanvasTimes(this.collisionWallTimes + 1);
     this.updateComboTimes(this.comboTimes + 1);
+    this.updatePierceTimes(this.pierceTimes + 1);
   }
 
   draw(ctx: CanvasRenderingContext2D) {

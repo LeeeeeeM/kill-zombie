@@ -59,7 +59,7 @@ const TaskDemo = () => {
   return (
     <>
       <div className="canvas">
-        <canvas ref={canvasRef} width="640" height="480"></canvas>
+        <canvas ref={canvasRef} width="320" height="540"></canvas>
       </div>
       <div className="btn-box">
         <button onClick={start}>Start Game</button>

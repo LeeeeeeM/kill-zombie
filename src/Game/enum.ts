@@ -2,4 +2,5 @@ export enum GameObjectEnum {
   ZOMBIE = "ZOMBIE",
   BULLET = "BULLET",
   PLAYER = "PLAYER",
+  BULLET_EXPLOSION = "BULLET_EXPLOSION"
 }

@@ -2,8 +2,14 @@ import { Circle, Quadtree } from "@timohausmann/quadtree-ts";
 import Zombie from "./GameObject/Zombie";
 import Bullet from "./GameObject/Bullet";
 import Player from "./GameObject/Player";
+import Explosion from "./GameObject/Explosion";
 import { BoundInterface, BulletEnhancedInterface } from "./type";
-import { DEFAULT_BULLET_ENHANCE_OBJECT, FAST_UPDATE } from "./constants";
+import {
+  DEFAULT_BULLET_ENHANCE_OBJECT,
+  DEFAULT_BULLET_EXPLOSION_ENHANCE_OBJECT,
+  DEFAULT_PLAYER_ENHANCE_OBJECT,
+  FAST_UPDATE,
+} from "./constants";
 import ZombieSpawner from "./Spawner/ZombieSpawner";
 import ZombieBossSpawner from "./Spawner/ZombieBossSpawner";
 import BulletSpawner from "./Spawner/BulletSpawner";
@@ -22,7 +28,7 @@ class Game {
 
   private player: Player;
 
-  private explodeBullets: Map<string, Bullet>;
+  private explodeBullets: Map<string, Explosion>;
 
   private running: boolean;
 
@@ -63,7 +69,9 @@ class Game {
     this.bullets = new Map();
     this.explodeBullets = new Map();
     // 游戏玩家，目前是一个
-    this.player = new Player(this.canvas.width / 2, this.canvas.height - 20);
+    this.player = new Player(this.canvas.width / 2, this.canvas.height - 20, {
+      ...DEFAULT_PLAYER_ENHANCE_OBJECT
+    });
     // 锁定的射击对象，目前和玩家 1vs1
     this.shotTargetZombie = null;
     // 游戏对象产生定时器
@@ -186,19 +194,26 @@ class Game {
     }
   }
 
+  resetTargetZombie(zombie: Zombie) {
+    if (zombie === this.shotTargetZombie) {
+      this.shotTargetZombie = null;
+    }
+  }
+
   update() {
     // 生成新的游戏对象
     this.generateGameObject();
-    // 清空四叉树数据
-    this.shotTargetZombie = null;
+
+    const hasTarget = !!this.getTargetZombie();
 
     for (let [, zombie] of this.zombies) {
       zombie.update();
       if (zombie.isOffCanvas(this.canvasBound)) {
         this.zombies.delete(zombie.count);
+        this.resetTargetZombie(zombie);
         this.quadTree.remove(zombie, FAST_UPDATE);
       } else {
-        this.updateTargetZombie(this.player.getY(), zombie);
+        !hasTarget && this.updateTargetZombie(this.player.getY(), zombie);
         this.quadTree.update(zombie, FAST_UPDATE);
       }
     }
@@ -243,7 +258,7 @@ class Game {
       bullet.draw(this.ctx);
     }
     for (let [, explodeBullet] of this.explodeBullets) {
-      explodeBullet.drawExplode(this.ctx);
+      explodeBullet.draw(this.ctx);
     }
   }
 
@@ -251,16 +266,18 @@ class Game {
     // 先处理爆炸效果
     for (let [, explodeBullet] of this.explodeBullets) {
       const detectCircle = new Circle({
-        x: explodeBullet.x,
-        y: explodeBullet.y,
-        r: explodeBullet.explodeRadius,
+        x: explodeBullet.getX(),
+        y: explodeBullet.getY(),
+        r: explodeBullet.getRadius(),
       });
       const affectZombies = this.quadTree.retrieve(detectCircle) as Zombie[];
 
       for (let zombie of affectZombies) {
         if (zombie.circleIntersect(detectCircle)) {
-          zombie.hitHealth(explodeBullet.explodeDamage);
+          zombie.hitHealth(explodeBullet.getDamage());
           if (zombie.isDead()) {
+            // 重置zombie
+            this.resetTargetZombie(zombie);
             this.player.addKill(zombie);
             this.zombies.delete(zombie.count);
             this.quadTree.remove(zombie, FAST_UPDATE);
@@ -271,7 +288,6 @@ class Game {
 
       // 移除所有的爆炸子弹
       this.explodeBullets.delete(explodeBullet.count);
-      Bullet.release(explodeBullet);
     }
 
     for (let [, bullet] of this.bullets) {
@@ -284,18 +300,32 @@ class Game {
 
       for (let zombie of affectZombies) {
         if (zombie.circleIntersect(detectCircle)) {
-          // 从普通子弹中移除
-          this.bullets.delete(bullet.count);
-          // 存储在下一帧需要爆炸的子弹映射中
-          this.explodeBullets.set(bullet.count, bullet);
-
-          zombie.hitHealth(bullet.damage);
+          zombie.hitHealth(bullet.getDamage());
           if (zombie.isDead()) {
+            // 重置目标zombie
+            this.resetTargetZombie(zombie);
             this.player.addKill(zombie);
             this.zombies.delete(zombie.count);
             this.quadTree.remove(zombie, FAST_UPDATE);
             break; // 避免重复删除
           }
+          // 无法穿透，则从普通子弹中移除
+          if (!bullet.hasPierceTimes()) {
+            this.bullets.delete(bullet.count);
+            Bullet.release(bullet);
+          }
+
+          // 允许爆炸，保存到对应
+          if (bullet.isExplosive()) {
+            const explosion = new Explosion(bullet.getX(), bullet.getY(), {
+              ...DEFAULT_BULLET_EXPLOSION_ENHANCE_OBJECT,
+              damage: bullet.getExpoldeDamage(),
+              radius: bullet.getExplodeRadius()
+            });
+            // 存储在下一帧需要爆炸的子弹映射中
+            this.explodeBullets.set(explosion.count, explosion);
+          }
+          bullet.checkPierce();
         }
       }
     }
@@ -304,7 +334,7 @@ class Game {
   shootBullet() {
     const player = this.player;
     const target = this.shotTargetZombie;
-    const angles = calculateRangeAngles(player.trajectoryCount);
+    const angles = calculateRangeAngles(player.getTrajectoryCount());
 
     for (let angle of angles) {
       const adjustedAngle = calculateAngle(player, target);
@@ -312,7 +342,7 @@ class Game {
         ...DEFAULT_BULLET_ENHANCE_OBJECT,
         damage: player.damage,
         angle: adjustedAngle + angle,
-        collisionWallTimes: player.collisionWallTimes,
+        collisionWallTimes: player.getCollisionWallTimes(),
       };
       const newBullet = Bullet.createBullet(
         player.getX(),
