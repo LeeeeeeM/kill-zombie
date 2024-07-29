@@ -1,4 +1,5 @@
 import { Circle } from "@timohausmann/quadtree-ts";
+import Vector from "./Object/Vector";
 
 export const getRandomRange = (start: number, end: number): number => {
   if (start > end) {
@@ -32,4 +33,49 @@ export const calculateAngle = (
   const dx = source.x - target.x;
   const dy = source.y - target.y;
   return Math.atan2(dy, dx);
+};
+
+export const calculateInterceptAngle = (
+  source: Circle,
+  target: Circle | null,
+  sourceSpeed: number,
+  targetSpeed: number
+): number => {
+  if (!target) return Math.PI / 2;
+  const sourcePos = new Vector(source.x, source.y);
+  const targetPos = new Vector(target.x, target.y);
+  const targetVel = new Vector(0, targetSpeed);
+  const relativePos = targetPos.subtract(sourcePos);
+  const effectiveRadius = source.r + target.r;
+  // 修改二次方程系数
+  const a =
+    sourceSpeed * sourceSpeed -
+    targetVel.x * targetVel.x -
+    targetVel.y * targetVel.y;
+  const b = 2 * (targetVel.x * relativePos.x + targetVel.y * relativePos.y);
+  const c =
+    -relativePos.x * relativePos.x -
+    relativePos.y * relativePos.y +
+    effectiveRadius * effectiveRadius;
+
+  // 求解二次方程
+  const discriminant = b * b - 4 * a * c;
+  if (discriminant < 0) {
+    return Math.PI / 2;
+  }
+
+  const t1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+  const t2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+  const t = Math.max(t1, t2);
+
+  if (t < 0) {
+    return Math.PI / 2;
+  }
+
+  const interceptPos = targetPos.add(targetVel.multiply(t));
+
+  // const bulletVec = interceptPos.subtract(sourcePos).multiply(1 / t); // 可以不归一化直接计算
+  const bulletVec = interceptPos.subtract(sourcePos);
+
+  return bulletVec.getRad();
 };

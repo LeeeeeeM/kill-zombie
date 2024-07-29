@@ -85,8 +85,8 @@ class Bullet extends GameObject {
   }
 
   _calculateVelocityVector(): VelocityVector {
-    const vx = this.speed * Math.cos(this.angle);
-    const vy = this.speed * Math.sin(this.angle);
+    const vx = -this.speed * Math.cos(this.angle);
+    const vy = -this.speed * Math.sin(this.angle);
     return { vx, vy };
   }
 
@@ -129,8 +129,8 @@ class Bullet extends GameObject {
   }
 
   update() {
-    this.x -= this.velocity.vx;
-    this.y -= this.velocity.vy;
+    this.x += this.velocity.vx;
+    this.y += this.velocity.vy;
   }
 
   draw(ctx: CanvasRenderingContext2D) {

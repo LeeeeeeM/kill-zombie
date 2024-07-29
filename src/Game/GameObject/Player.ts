@@ -3,6 +3,7 @@ import Zombie from "./Zombie";
 import { GameObjectEnum } from "../enum";
 import { DEFAULT_BULLET_ENHANCE_OBJECT, LEVEL_UP_KILL_COUNT } from "../constants";
 import { BulletConstructorProps, BulletEnhancedInterface, PlayerEnhancedInterface } from "../type";
+import { calculateInterceptAngle } from "../utils";
 
 class Player extends GameObject {
   damage: number;
@@ -15,6 +16,7 @@ class Player extends GameObject {
   // 连击数
   private comboTimes: number;
   private pierceTimes: number;
+  private speed: number;
   constructor(x: number, y: number, enhanced: PlayerEnhancedInterface) {
     super(x, y, enhanced.radius, GameObjectEnum.PLAYER);
     this.damage = enhanced.damage;
@@ -24,6 +26,7 @@ class Player extends GameObject {
     this.collisionWallTimes = enhanced.collisionWallTimes;
     this.comboTimes = enhanced.comboTimes;
     this.pierceTimes = enhanced.pierceTimes;
+    this.speed = enhanced.speed;
   }
 
   getCollisionWallTimes() {
@@ -89,6 +92,10 @@ class Player extends GameObject {
     return this.killCount;
   }
 
+  getSpeed() {
+    return this.speed;
+  }
+
   levelUp() {
     if (this.level > 2) return;
     console.log("level up!!!");
@@ -132,11 +139,12 @@ class Player extends GameObject {
     return angles;
   }
 
-  shotBullets(target: GameObject | null): BulletConstructorProps[] {
+  shotBullets(target: Zombie): BulletConstructorProps[] {
     const bulletsProps: BulletConstructorProps[] = [];
     const angles = this._calculateRangeAngles();
     for (let angle of angles) {
-      const adjustedAngle = this._calculateAngle(target);
+      // const adjustedAngle1 = this._calculateAngle(target);
+      const adjustedAngle = calculateInterceptAngle(this, target, this.speed, target.getSpeed());
       const enhanced: BulletEnhancedInterface = {
         ...DEFAULT_BULLET_ENHANCE_OBJECT,
         damage: this.damage,
