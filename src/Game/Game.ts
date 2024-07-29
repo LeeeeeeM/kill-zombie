@@ -13,7 +13,7 @@ import {
 import ZombieSpawner from "./Spawner/ZombieSpawner";
 import ZombieBossSpawner from "./Spawner/ZombieBossSpawner";
 import BulletSpawner from "./Spawner/BulletSpawner";
-import { calculateAngle, calculateRangeAngles } from "./utils";
+import { calculateAngle, calculateInterceptAngle, calculateRangeAngles } from "./utils";
 
 class Game {
   public canvas: HTMLCanvasElement;
@@ -333,11 +333,12 @@ class Game {
 
   shootBullet() {
     const player = this.player;
-    const target = this.shotTargetZombie;
+    const target = this.shotTargetZombie!;
     const angles = calculateRangeAngles(player.getTrajectoryCount());
 
     for (let angle of angles) {
-      const adjustedAngle = calculateAngle(player, target);
+      // const adjustedAngle = calculateAngle(player, target);
+      const adjustedAngle = calculateInterceptAngle(player, target, player.getSpeed(), target.getSpeed());
       const enhanced: BulletEnhancedInterface = {
         ...DEFAULT_BULLET_ENHANCE_OBJECT,
         damage: player.damage,

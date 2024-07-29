@@ -1,7 +1,6 @@
 import GameObject from "./GameObject";
 import { GameObjectEnum } from "../enum";
 import { ZombieEnhanceInterface } from "../type";
-import { Circle } from "@timohausmann/quadtree-ts";
 
 class Zombie extends GameObject {
   private speed: number;
@@ -12,6 +11,10 @@ class Zombie extends GameObject {
     this.speed = enhanced.speed;
     this.health = enhanced.health;
     this.is_boss = enhanced.isBoss;
+  }
+
+  getSpeed() {
+    return this.speed;
   }
 
   update() {

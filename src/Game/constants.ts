@@ -18,7 +18,7 @@ export const DEFAULT_BULLET_ENHANCE_OBJECT: BulletEnhancedInterface = {
   radius: 3,
   angle: Math.PI / 2,
   damage: 30,
-  speed: 10,
+  speed: -10,
   canExplode: true,
   explodeRadius: 20,
   explodeDamage: 1,
@@ -37,7 +37,8 @@ export const DEFAULT_PLAYER_ENHANCE_OBJECT: PlayerEnhancedInterface = {
   trajectoryCount: 1,
   collisionWallTimes: 0,
   comboTimes: 1,
-  pierceTimes: 2
+  pierceTimes: 2,
+  speed: 10
 };
 
 export const LEVEL_UP_KILL_COUNT = 2 * 6;

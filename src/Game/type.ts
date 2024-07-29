@@ -29,6 +29,7 @@ export interface PlayerEnhancedInterface {
   collisionWallTimes: number;
   comboTimes: number;
   pierceTimes: number;
+  speed: number;
 }
 
 export interface VelocityVector {
