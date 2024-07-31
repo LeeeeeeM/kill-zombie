@@ -40,11 +40,18 @@ class GameObject extends Circle {
 
   draw(ctx: CanvasRenderingContext2D) {}
 
-  circleIntersect(other: Circle) {
-    const dx = this.x - other.x;
-    const dy = this.y - other.y;
+  // circleIntersect(other: Circle) {
+  //   const dx = this.x - other.x;
+  //   const dy = this.y - other.y;
+  //   const distance = Math.sqrt(dx * dx + dy * dy);
+  //   return distance <= this.r + other.r;
+  // }
+
+  circleIntersect(source: Circle, target: Circle) {
+    const dx = source.x - target.x;
+    const dy = source.y - target.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    return distance <= this.r + other.r;
+    return distance <= source.r + target.r;
   }
 
   isOffCanvas(bound: BoundInterface) {

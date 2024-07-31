@@ -39,9 +39,9 @@ export const calculateInterceptAngle = (
   source: Circle,
   target: Circle | null,
   sourceSpeed: number,
-  targetSpeed: number
+  targetSpeed: number = 0
 ): number => {
-  if (!target) return Math.PI / 2;
+  if (!target) return -Math.PI / 2;
   const sourcePos = new Vector(source.x, source.y);
   const targetPos = new Vector(target.x, target.y);
   const targetVel = new Vector(0, targetSpeed);
@@ -61,7 +61,7 @@ export const calculateInterceptAngle = (
   // 求解二次方程
   const discriminant = b * b - 4 * a * c;
   if (discriminant < 0) {
-    return Math.PI / 2;
+    return -Math.PI / 2;
   }
 
   const t1 = (-b + Math.sqrt(discriminant)) / (2 * a);
@@ -69,7 +69,7 @@ export const calculateInterceptAngle = (
   const t = Math.max(t1, t2);
 
   if (t < 0) {
-    return Math.PI / 2;
+    return -Math.PI / 2;
   }
 
   const interceptPos = targetPos.add(targetVel.multiply(t));

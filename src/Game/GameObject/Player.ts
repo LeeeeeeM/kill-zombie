@@ -144,7 +144,7 @@ class Player extends GameObject {
     const angles = this._calculateRangeAngles();
     for (let angle of angles) {
       // const adjustedAngle1 = this._calculateAngle(target);
-      const adjustedAngle = calculateInterceptAngle(this, target, this.speed, target.getSpeed());
+      const adjustedAngle = calculateInterceptAngle(this, target, this.speed, target?.getSpeed());
       const enhanced: BulletEnhancedInterface = {
         ...DEFAULT_BULLET_ENHANCE_OBJECT,
         damage: this.damage,
