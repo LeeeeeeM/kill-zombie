@@ -3,6 +3,7 @@ export interface ZombieEnhanceInterface {
   speed: number;
   health: number;
   isBoss: boolean;
+  hitRadius: number;
 }
 
 export interface ExplosionEnhanceInterface {
@@ -47,6 +48,12 @@ export interface BoundInterface {
 export interface Position {
   x: number;
   y: number;
+}
+
+export interface CircleInterface {
+  x: number;
+  y: number;
+  r: number;
 }
 
 export interface BulletConstructorProps {

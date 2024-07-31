@@ -5,6 +5,7 @@ export const DEFAULT_ZOMBIE_ENHANCE_OBJECT: ZombieEnhanceInterface = {
   speed: 0.2,
   health: 50,
   isBoss: false,
+  hitRadius: 10
 };
 
 export const DEFAULT_ZOMBIE_BOSS_ENHANCE_OBJECT: ZombieEnhanceInterface = {
@@ -12,6 +13,7 @@ export const DEFAULT_ZOMBIE_BOSS_ENHANCE_OBJECT: ZombieEnhanceInterface = {
   speed: 0.2,
   health: 500,
   isBoss: true,
+  hitRadius: 10
 };
 
 export const DEFAULT_BULLET_ENHANCE_OBJECT: BulletEnhancedInterface = {

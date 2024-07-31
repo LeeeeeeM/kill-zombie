@@ -1,16 +1,23 @@
 import GameObject from "./GameObject";
 import { GameObjectEnum } from "../enum";
-import { ZombieEnhanceInterface } from "../type";
+import { CircleInterface, ZombieEnhanceInterface } from "../type";
+import { Circle } from "@timohausmann/quadtree-ts";
 
 class Zombie extends GameObject {
   private speed: number;
   private health: number;
   private is_boss: boolean;
+  private hit_area: CircleInterface[];
   constructor(x: number, y: number, enhanced: ZombieEnhanceInterface) {
     super(x, y, enhanced.radius, GameObjectEnum.ZOMBIE);
     this.speed = enhanced.speed;
     this.health = enhanced.health;
     this.is_boss = enhanced.isBoss;
+    this.hit_area = [{
+      x: 0,
+      y: 0,
+      r: enhanced.hitRadius
+    }];
   }
 
   getSpeed() {
@@ -27,6 +34,16 @@ class Zombie extends GameObject {
 
   isBoss() {
     return this.is_boss;
+  }
+
+  checkHited(circle: Circle) {
+    for (let i = 0; i < this.hit_area.length; i++) {
+      const area = this.hit_area[i];
+      if (this.circleIntersect({ x: this.x + area.x, y: this.y + area.y, r: area.r } as Circle, circle)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   isDead() {

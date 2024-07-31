@@ -273,7 +273,7 @@ class Game {
       const affectZombies = this.quadTree.retrieve(detectCircle) as Zombie[];
 
       for (let zombie of affectZombies) {
-        if (zombie.circleIntersect(detectCircle)) {
+        if (zombie.checkHited(detectCircle)) {
           zombie.hitHealth(explodeBullet.getDamage());
           if (zombie.isDead()) {
             // 重置zombie
@@ -299,7 +299,7 @@ class Game {
       const affectZombies = this.quadTree.retrieve(detectCircle) as Zombie[];
 
       for (let zombie of affectZombies) {
-        if (zombie.circleIntersect(detectCircle)) {
+        if (zombie.checkHited(detectCircle)) {
           zombie.hitHealth(bullet.getDamage());
           if (zombie.isDead()) {
             // 重置目标zombie
@@ -338,7 +338,7 @@ class Game {
 
     for (let angle of angles) {
       // const adjustedAngle = calculateAngle(player, target);
-      const adjustedAngle = calculateInterceptAngle(player, target, player.getSpeed(), target.getSpeed());
+      const adjustedAngle = calculateInterceptAngle(player, target, player.getSpeed(), target?.getSpeed());
       const enhanced: BulletEnhancedInterface = {
         ...DEFAULT_BULLET_ENHANCE_OBJECT,
         damage: player.damage,
